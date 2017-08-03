@@ -1,9 +1,9 @@
-h1. timeTracker: a small-company-level time tracker.
+# timeTracker: a small-company-level time tracker.
 
-h3. Scope
+### Scope
 
-h3. Structure
+### Structure
 
-h3. Installation
+### Installation
 
-h3. Usage
+### Usage
