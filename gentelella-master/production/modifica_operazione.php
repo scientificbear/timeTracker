@@ -25,7 +25,44 @@
   </style>-->
   <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-  <script>
+
+  </head>
+
+<body class="nav-md">
+
+<?php
+
+$id_operazione = $_GET['id_operazione'];
+
+    include 'connessione.php';https://www.facebook.com/videocall/incall/?peer_id=1017756848#
+
+    $id_operazione = $_GET['id_operazione'];
+    $sql = 'SELECT * FROM operazioni where id_operazione='.$id_operazione;
+
+    $retval = mysqli_query( $conn, $sql ); // eseguo la ricerca
+
+    if(! $retval ) { // se non ottiene $retval, per cui se non può eseguire la ricerca
+     die('Could not get data: ' . mysqli_error($conn));
+   }
+
+    // ottengo valori da $retval
+   $details = mysqli_fetch_assoc($retval);
+   $ore = floor($details['minuti'] / 60);
+   $minuti = $details['minuti'] % 60;
+
+   $sql_azienda = 'SELECT rag_sociale FROM aziende where id_azienda='.$details['id_azienda'];
+    $retval_azienda = mysqli_query( $conn, $sql_azienda );
+    $dettagli_azienda = mysqli_fetch_assoc($retval_azienda);
+
+    ?>    
+
+    <script>
+  $( function() {
+    $('#datepicker_today').datepicker({ dateFormat: 'yy-mm-dd' }).datepicker("setDate", '<?php echo $details['giorno']; ?>').val();
+  } );
+</script>
+
+<script>
   $( function() {
     $.widget( "custom.combobox", {
       _create: function() {
@@ -40,22 +77,20 @@
  
       _createAutocomplete: function() {
         var selected = this.element.children( ":selected" ),
-          value = selected.val() ? selected.text() : "";
- 
+          value = selected.val() ? selected.text() : "<?php echo $dettagli_azienda['rag_sociale'] ?>";
+
         this.input = $( "<input>" )
           .appendTo( this.wrapper )
           .val( value )
           .attr( "title", "" )
-          .addClass( "custom-combobox-input ui-widget ui-widget-content  ui-corner-left form-control" )
+//           .addClass( "custom-combobox-input ui-widget ui-widget-content ui-state-default ui-corner-left" )
           .autocomplete({
             delay: 0,
             minLength: 0,
             source: $.proxy( this, "_source" )
           })
           .tooltip({
-            classes: {
-              "ui-tooltip": "ui-state-highlight"
-            }
+            classes: { "ui-tooltip": "ui-state-highlight" }
           });
  
         this._on( this.input, {
@@ -69,8 +104,8 @@
           autocompletechange: "_removeIfInvalid"
         });
       },
- /*
-      _createShowAllButton: function() {
+ 
+      /*_createShowAllButton: function() {
         var input = this.input,
           wasOpen = false;
  
@@ -163,32 +198,15 @@
     });
   } );
   </script>
-  
-    <script>
-  $( function() {
-    $('#datepicker_today').datepicker({ dateFormat: 'yy-mm-dd' }).datepicker("setDate", new Date()).val();
-  } );
-</script>
 
-<script>
-    $(function() {
-        $('.chart').easyPieChart({
-            lineWidth: 5,
-            lineCap: 'butt',
-            barColor: '#26b99a'
-        });
-    });
-</script>
 
-</head>
 
-<body class="nav-md">
   <div class="container body">
     <div class="main_container">
       <div class="col-md-3 left_col">
         <div class="left_col scroll-view">
           <div class="navbar nav_title" style="border: 0;">
-            <a href="home.php" class="site_title"><i class="fa fa-paw"></i> <span>Time Tracking</span></a>
+            <a href="home.php" class="site_title"><i class="fa fa-paw"></i> <span>Time tracking</span></a>
           </div>
 
           <div class="clearfix"></div>
@@ -207,12 +225,6 @@
 
           <br />
           
-          <?php
-            // Connessione Database mysql
-          include 'connessione.php';
-
-          ?>
-
           <?php include "sidebar.php" ?>
 
           <?php include "topbar.php" ?>
@@ -221,7 +233,7 @@
           <div class="right_col" role="main">
 
             <div class="row">
-              <div class="col-md-8 col-sm-8 col-xs-8">
+              <div class="col-md-12 col-sm-12 col-xs-12">
                 <div class="x_panel">
                   <div class="x_title">
                     <h2>Inserisci registrazione <small></small></h2>
@@ -229,13 +241,13 @@
                   </div>
                   <div class="x_content">
 <?php
-// se ho premuto "add", dunque se ho giÃ  inserito i dati
+// se ho premuto "add", dunque se ho già inserito i dati
 if(isset($_POST['add'])) {
     //Connessione database
 
     include 'connessione.php';
     
-    $data_operazione = date('Y-m-d',strtotime($_POST['data_operazione']));
+    $data_operazione = $_POST['data_operazione'];
     $ore_operazione = $_POST['ore_operazione'];
     $minuti_operazione = $_POST['minuti_operazione'];
     $minuti_totali = ($ore_operazione * 60) + $minuti_operazione;
@@ -249,28 +261,35 @@ if(isset($_POST['add'])) {
     }
     
 
-  $sql = "INSERT INTO operazioni (id_utente,id_azienda,descrizione,giorno,minuti) VALUES ('$logged_userid','$id_azienda_operazione','$descrizione_operazione','$data_operazione','$minuti_totali')";
+	$sql = "UPDATE operazioni SET id_utente=$logged_userid,id_azienda='$id_azienda_operazione',descrizione='$descrizione_operazione',giorno='$data_operazione',minuti=$minuti_totali where id_operazione=$id_operazione";
 
-  if ($conn->query($sql) === TRUE) {
+	if ($conn->query($sql) === TRUE) {
       $last_id = mysqli_insert_id($conn);
-      echo "Nuova registrazione aggiunta con successo. <a href='home.php'>Torna alla home.</a> oppure <a href='vedi_singola_operazione.php?id_operazione=$last_id'>vedi quanto inserito</a>";
-  } else {
-      echo "Error: " . $sql . "<br>" . $conn->error;
-  }
+	    echo "Registrazione modificata con successo. <a href='home.php'>Torna alla home.</a> oppure <a href='vedi_singola_operazione.php?id_operazione=$id_operazione'>vedi quanto inserito</a>";
+	} else {
+	    echo "Error: " . $sql . "<br>" . $conn->error;
+	}
 
-  $conn->close();
+	$conn->close();
 
 }else { //altrimenti, nel caso in cui dunque io debba ancora inserire valori nel form
     include 'connessione.php';
     ?>
                     <!-- start form for validation -->
-                    <form method = "post" action = "<?php $_PHP_SELF ?>">
-                    <div class="col-md-6 col-sm-6 col-xs-6">
-                      <label for="fullname">Data :</label>
-                      <input type="text" class="form-control" id="single_cal2" placeholder="First Name" aria-describedby="inputSuccess2Status2" name="data_operazione">
-                      <br />
-                      <label for="fullname">Azienda :</label>
-                      <select id="combobox" name="id_azienda_operazione">
+                  <form method="post" id="demo-form2" class="form-horizontal form-label-left" action="<?php $_PHP_SELF ?>">
+                    <div class="form-group">
+                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">Data
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                          <input type="text" class="form-control" id="datepicker_today" placeholder="First Name" aria-describedby="inputSuccess2Status2" name="data_operazione">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">Azienda
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                          <select id="combobox" name="id_azienda_operazione">
                         <option value="">Select one...</option>
                         <?php 
                         $sql_ind="SELECT * FROM aziende ORDER BY rag_sociale ASC";
@@ -279,25 +298,50 @@ if(isset($_POST['add'])) {
                             die('Could not enter data: ' . mysql_error());
                         }
                         while($row_ind = mysqli_fetch_assoc($retval_ind)) {//Array or records stored in $row
-                            echo "<option value=$row_ind[id_azienda]>$row_ind[rag_sociale]</option>";
+                            if ($row_ind[id_azienda]==$details[id_azienda]) {
+                            	echo "<option value=$row_ind[id_azienda] selected>$row_ind[rag_sociale]</option>";
+                            } else {
+                            	echo "<option value=$row_ind[id_azienda]>$row_ind[rag_sociale]</option>";
+                            }
                         }
                         ?>
                       </select>
-                      <br />
-                      <label for="message">Descrizione (500 max) :</label>
-                      <textarea required="required" class="form-control" name = "descrizione_operazione" type = "text" data-parsley-trigger="keyup"  data-parsley-maxlength="500"></textarea>
-                    </div>
-                    <div class="col-md-6 col-sm-6 col-xs-6">
-                      <label for="email">Ore :</label>
-                      <input class="form-control" type="number" name="ore_operazione" required />
-                      <br />
-                      <label for="fullname">Minuti :</label>
-                      <input class="form-control" type="number" name="minuti_operazione" required value="0"/>
-                      <br /><label></label><br /><br />
-                      <div align="center">
-                      <input name = "add" type = "submit" value = "Aggiungi registrazione" class="btn btn-primary">
                       </div>
                     </div>
+
+                    <div class="form-group">
+                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">Ore
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                          <input type="text" type="number" name="ore_operazione" value="<?php echo $ore; ?>" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">Minuti
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                          <input type="text" id="datepicker_today" type="number" name="minuti_operazione" value="<?php echo $minuti; ?>" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">Descrizione
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                          <textarea required="required" class="form-control" name = "descrizione_operazione" type = "text" data-parsley-trigger="keyup"  data-parsley-maxlength="500"><?php echo $details['descrizione']; ?></textarea>
+                        </div>
+                    </div>
+
+
+
+                    <div class="form-group">
+                      <div align="center">
+                      <input name = "add" type = "submit" value = "Salva modifiche" class="btn btn-primary"> <button onclick="history.go(-1);" class="btn btn-primary">Annulla </button>
+                      </div>
+                    </div>
+
+
 
                     </form>
                     <!-- end form for validations -->
@@ -306,101 +350,9 @@ if(isset($_POST['add'])) {
                 </div>
               </div>
 
-              <div class="col-md-4 col-sm-4 col-xs-4">
-                <div class="x_panel">
-                  <div class="x_title">
-                    <h2>La tua giornata <small></small></h2>
-                    
-                    <div class="clearfix"></div>
-                  </div>
-                  <div class="x_content">
-                    <div class="dashboard-widget-content">
-                      <!-- <h2 class="line_30">Titolo</h2> --> 
-                      <?php 
-                          $sql = "SELECT sum(minuti) as minuti FROM operazioni where giorno=CURRENT_DATE() and id_utente='$logged_userid'"; // Query di ricerca
-                          $retval = mysqli_query( $conn, $sql ); // eseguo la ricerca
-                          if(! $retval ) { // se non ottiene $retval, per cui se non puÃ² eseguire la ricerca
-                           die('Could not get data: ' . mysqli_error($conn));
-                            }
-                          $row = mysqli_fetch_assoc($retval);
-                          $ore_operazione = floor($row['minuti'] /  60);
-                          $minuti_operazione = $row['minuti'] % 60; 
-                          $percentuale = round(100 * $row['minuti'] / 480);
-
-                          echo "<h3>$percentuale%</h3>";
-                          echo "<p>Hai inserito $ore_operazione h $minuti_operazione</p>";
-
-                          echo '<div class="chart" data-percent="'.$percentuale.'"><br><br><h4>'.$percentuale.'%</h4></div>';
-
- 					?>
-                        
-
-                    </div>
-                  </div>
-                </div>
-              </div>
-
             </div>
 
-
-            <div class="row">
-              <div class="col-md-12 col-sm-12 col-xs-12">
-                <div class="x_panel">
-                  <div class="x_title">
-                    <h2>Le tue registrazioni di oggi</h2>
-                    <div class="clearfix"></div>
-                  </div>
-
-
-
-                  <div class="x_content">
-
-                    <?php
-
-    $sql = "SELECT * FROM operazioni where giorno=CURRENT_DATE() and id_utente='$logged_userid' ORDER BY id_operazione"; // Query di ricerca
-    $retval = mysqli_query( $conn, $sql ); // eseguo la ricerca
-
-    if(! $retval ) { // se non ottiene $retval, per cui se non puÃ² eseguire la ricerca
-     die('Could not get data: ' . mysqli_error($conn));
-   } ?>
-
-   <table class="table table-striped table-bordered">
-    <thead>
-      <tr>
-        <th>Data</th>
-        <th>Azienda</th>
-        <th>Tempo</th>
-        <th>Azioni</th>
-      </tr>
-    </thead>
-
-
-    <tbody>
-
-<?php    // corpo tabella (<tr> inizia una riga, <th> inizia una cella)
-    while($row = mysqli_fetch_assoc($retval)) {
-//      $sql_ind = "SELECT indirizzo FROM indirizzi WHERE id_indirizzo=".$row['id_indirizzo_richiesta'];
-      $retval_azienda = mysqli_query( $conn, "SELECT rag_sociale FROM aziende WHERE id_azienda=".$row['id_azienda'] );
-      $rag_sociale_azienda = mysqli_fetch_assoc($retval_azienda);
-      $ore_operazione = floor($row['minuti'] /  60);
-      $minuti_operazione = $row['minuti'] % 60;
-      echo "<tr>".
-        "<td>{$row['giorno']}</td>".
-        "<td>{$rag_sociale_azienda['rag_sociale']}</td>".
-        "<td>$ore_operazione h $minuti_operazione min </td>".
-        "<td><a href='modifica_operazione.php?id_operazione=".$row['id_operazione']."'>modifica</a> - <a href='elimina_operazione.php?id_operazione=".$row['id_operazione']."'>elimina</a></td>".
-      "</tr>";
-    }
-mysqli_free_result($retval);
-?>
-    </tbody>
-  </table>
-</div>
-</div>
-</div>
-</div>
-
-</div>
+          </div>
 <!-- /page content -->
 
 <!-- footer content -->
