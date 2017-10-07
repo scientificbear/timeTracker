@@ -328,7 +328,7 @@ if(isset($_POST['add'])) {
                           $percentuale = round(100 * $row['minuti'] / 480);
 
                           echo "<h3>$percentuale%</h3>";
-                          echo "<p>Hai inserito $ore_operazione h $minuti_operazione</p>";
+                          echo "<p>Hai inserito $ore_operazione h $minuti_operazione m</p>";
 
                           echo '<div class="chart" data-percent="'.$percentuale.'"><br><br><h4>'.$percentuale.'%</h4></div>';
 

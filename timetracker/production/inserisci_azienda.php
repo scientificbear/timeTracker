@@ -116,7 +116,7 @@ if(isset($_POST['add'])) {
 
                     <div class="form-group">
                       <div align="center">
-                      <input name = "add" type = "submit" value = "Aggiungi registrazione" class="btn btn-primary">
+                      <input name = "add" type = "submit" value = "Aggiungi azienda" class="btn btn-primary">
                       </div>
                     </div>
 

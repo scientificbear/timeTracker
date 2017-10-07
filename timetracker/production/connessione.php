@@ -1,8 +1,8 @@
 <?php
 // Connects to Our Database
-$username="<HERE YOUR USERNAME>";
-$password="<HERE YOUR PASSWORD>";
-$database="<HERE YOUR DATABASE>";
+$username="patrickz22455";
+$password="patr55674";
+$database="patrickz22455";
 
 $conn=mysqli_connect("sql.patrickzecchin.com", $username, $password)
 or die(mysqli_error($conn));
